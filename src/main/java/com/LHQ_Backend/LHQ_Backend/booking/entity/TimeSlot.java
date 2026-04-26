@@ -42,8 +42,16 @@ public class TimeSlot {
     @JoinColumn(name = "lawyer_id", nullable = false)
     private LawyerProfile lawyer;
 
+     /*
+     * NULL  = custom slot (lawyer created manually)
+     * NOT NULL = generated from an AvailabilityTemplate by the scheduler
+     *
+     * We intentionally do NOT cascade delete from template -> slots.
+     * If a lawyer deletes a template, existing booked slots must survive.
+     * The service layer should only clean up AVAILABLE slots on template deletion.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
+    @JoinColumn(name = "template_id", nullable = true)
     private AvailabilityTemplate template;
 
     @Column(name = "start_time", nullable = false)
