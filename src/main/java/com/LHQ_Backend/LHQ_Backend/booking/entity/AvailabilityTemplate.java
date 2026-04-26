@@ -1,12 +1,12 @@
 package com.LHQ_Backend.LHQ_Backend.booking.entity;
 
-import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.LHQ_Backend.LHQ_Backend.booking.enums.DayOfWeek;
 import com.LHQ_Backend.LHQ_Backend.lawyer.entity.LawyerProfile;
 
 import jakarta.persistence.Column;

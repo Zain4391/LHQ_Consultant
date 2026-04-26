@@ -2,6 +2,7 @@ package com.LHQ_Backend.LHQ_Backend.cases.entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.LHQ_Backend.LHQ_Backend.cases.enums.CaseStatus;
@@ -56,6 +57,7 @@ public class Case {
    @Builder.Default
    private CaseStatus status = CaseStatus.OPEN;
 
+   @CreationTimestamp
    @Column(name = "opened_at")
     private Instant openedAt;
 
