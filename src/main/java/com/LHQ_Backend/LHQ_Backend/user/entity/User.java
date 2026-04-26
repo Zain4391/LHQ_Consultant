@@ -5,13 +5,17 @@ import java.time.Instant;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.LHQ_Backend.LHQ_Backend.lawyer.entity.LawyerProfile;
 import com.LHQ_Backend.LHQ_Backend.user.enums.Role;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,4 +58,7 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private LawyerProfile lawyerProfile;
 }
