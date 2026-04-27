@@ -10,6 +10,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import com.LHQ_Backend.LHQ_Backend.user.entity.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -58,7 +59,7 @@ public class LawyerProfile {
     @Column(name = "years_of_experience")
     private Integer yearsOfExperience;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "lawyer_specialties",
         joinColumns = @JoinColumn(name = "lawyer_id"),
