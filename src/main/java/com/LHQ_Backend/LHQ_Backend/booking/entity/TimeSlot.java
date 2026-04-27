@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +26,17 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "time_slots")
+@Table(name = "time_slots",
+    /*
+     * A lawyer cannot have two slots starting at the same time.
+     * This is the DB-level safety net — service layer checks overlap too,
+     * but this constraint is the last line of defense.
+     */
+    uniqueConstraints = @UniqueConstraint(
+        name = "uq_lawyer_start_time",
+        columnNames = {"lawyer_id", "start_time"}
+    )
+)
 @Getter
 @Setter
 @NoArgsConstructor
