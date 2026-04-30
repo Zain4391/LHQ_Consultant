@@ -34,7 +34,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Booking {
-    
+
     @Id
     @UuidGenerator
     @Column(updatable = false, nullable = false)
@@ -66,4 +66,11 @@ public class Booking {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @Column(name = "client_consent", nullable = true)
+    boolean clientConsent;
+
+    @CreationTimestamp
+    @Column(name = "client_decided_at", nullable = true)
+    Instant clientDecidedAt;
 }
