@@ -1,50 +1,55 @@
-# LHQ Backend
+# LHQ Consultant — Backend
 
-Spring Boot backend for the LHQ platform.
+Spring Boot REST API backend for the LHQ Consultant platform — a legal services application that connects clients with lawyers, manages bookings, tracks cases, and collects reviews.
 
 ## Tech Stack
 
-- Java 25
-- Spring Boot 4.0.6
-- Spring Security
-- Spring Data JPA
-- PostgreSQL
-- Redis
-- RabbitMQ
-- Maven
+| Layer | Technology |
+|---|---|
+| Language | Java 25 |
+| Framework | Spring Boot 4.0.6 |
+| Security | Spring Security + JWT (jjwt 0.12.6) |
+| Persistence | Spring Data JPA + PostgreSQL |
+| Caching | Spring Data Redis |
+| Messaging | Spring AMQP + RabbitMQ |
+| Validation | Spring Validation |
+| Utilities | Lombok, DataFaker |
+| Build | Maven |
 
 ## Prerequisites
 
 - JDK 25
-- Maven (or use `mvnw` / `mvnw.cmd`)
-- Docker (optional but recommended for Redis and RabbitMQ)
+- Maven (or use the included `mvnw` / `mvnw.cmd` wrapper)
 - PostgreSQL database
+- Redis
+- RabbitMQ (or Docker for the last two)
 
 ## Quick Start
 
-1. Clone the repository.
-2. Move into the backend directory:
+1. Clone the repository:
 
 ```bash
-cd LHQ_Backend
+git clone https://github.com/Zain4391/LHQ_Consultant.git
+cd LHQ_Consultant
 ```
 
-3. Configure database and app settings in `src/main/resources/application.properties`.
-4. (Optional) Start infrastructure services from the repository root:
+2. Configure database and application settings in `src/main/resources/application.properties`.
+
+3. (Optional) Start Redis and RabbitMQ via Docker Compose:
 
 ```bash
 docker compose up -d
 ```
 
-5. Run the backend:
+4. Run the application:
 
-Windows:
+**Windows:**
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-macOS/Linux:
+**macOS / Linux:**
 
 ```bash
 ./mvnw spring-boot:run
@@ -58,89 +63,69 @@ Run tests:
 ./mvnw test
 ```
 
-Build jar:
+Build executable jar:
 
 ```bash
 ./mvnw clean package
 ```
 
-## Services via Docker Compose
+## Infrastructure Services (Docker Compose)
 
-The root `docker-compose.yml` starts:
+| Service | Default Port |
+|---|---|
+| Redis | 6379 |
+| RabbitMQ | 5672 |
+| RabbitMQ Management UI | 15672 |
 
-- Redis on `6379`
-- RabbitMQ on `5672`
-- RabbitMQ Management UI on `15672`
+## Domain Modules
+
+| Module | Responsibility |
+|---|---|
+| `auth` | Registration, login, and JWT refresh token flow |
+| `user` | User profile management |
+| `lawyer` | Lawyer profile and specialties |
+| `booking` | Availability templates, time slots, and bookings |
+| `cases` | Client-lawyer relationships and legal case tracking |
+| `review` | Booking reviews with sentiment tracking |
+
+See [`docs/entity_documentation.md`](docs/entity_documentation.md) for a full description of all JPA entities and their relationships.
+
+## Project Structure
+
+```text
+LHQ_Consultant/
+├── docs/                          # Entity and design documentation
+├── src/
+│   ├── main/
+│   │   └── java/com/LHQ_Backend/LHQ_Backend/
+│   │       ├── LhqBackendApplication.java
+│   │       ├── auth/
+│   │       ├── booking/
+│   │       ├── cases/
+│   │       ├── lawyer/
+│   │       ├── review/
+│   │       └── user/
+│   └── test/
+│       └── java/com/LHQ_Backend/LHQ_Backend/
+├── pom.xml
+├── mvnw
+└── mvnw.cmd
+```
+
+Each domain module follows a consistent internal layout:
+
+```text
+<module>/
+├── DTOs/
+│   ├── Request/
+│   └── Response/
+├── entity/
+├── enums/
+├── repository/
+└── service/
+```
 
 ## Configuration Notes
 
-- Keep secrets (database credentials, tokens, keys) out of source control.
-- Prefer environment variables or a separate local config profile for sensitive values.
-
-## Existing Folder Structure
-
-```text
-LHQ/
-|-- docker-compose.yml
-|-- diagrams/
-|-- docs/
-|-- LHQ_Backend/
-|   |-- HELP.md
-|   |-- mvnw
-|   |-- mvnw.cmd
-|   |-- pom.xml
-|   |-- READE.md
-|   |-- README.md
-|   |-- src/
-|   |   |-- main/
-|   |   |   |-- java/
-|   |   |   |   |-- com/
-|   |   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |   |   |-- LhqBackendApplication.java
-|   |   |   |   |   |   |   |-- auth/
-|   |   |   |   |   |   |   |-- booking/
-|   |   |   |   |   |   |   |-- case/
-|   |   |   |   |   |   |   |-- config/
-|   |   |   |   |   |   |   |-- lawyer/
-|   |   |   |   |   |   |   |-- notification/
-|   |   |   |   |   |   |   |-- review/
-|   |   |   |   |   |   |   |-- user/
-|   |   |   |-- resources/
-|   |   |   |   |-- application.properties
-|   |   |   |   |-- static/
-|   |   |   |   |-- templates/
-|   |   |-- test/
-|   |   |   |-- java/
-|   |   |   |   |-- com/
-|   |   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |   |   |-- LhqBackendApplicationTests.java
-|   |-- target/
-|   |   |-- classes/
-|   |   |   |-- application.properties
-|   |   |   |-- com/
-|   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |   |-- auth/
-|   |   |   |   |   |   |-- booking/
-|   |   |   |   |   |   |-- case/
-|   |   |   |   |   |   |-- config/
-|   |   |   |   |   |   |-- lawyer/
-|   |   |   |   |   |   |-- notification/
-|   |   |   |   |   |   |-- review/
-|   |   |   |   |   |   |-- user/
-|   |   |-- generated-sources/
-|   |   |   |-- annotations/
-|   |   |-- generated-test-sources/
-|   |   |   |-- test-annotations/
-|   |   |-- test-classes/
-|   |   |   |-- com/
-|   |   |   |   |-- LHQ_Backend/
-|   |   |   |   |   |-- LHQ_Backend/
-```
-
-## Notes
-
-- `target/` is build output generated by Maven.
-- Domain modules are organized under `auth`, `booking`, `case`, `lawyer`, `notification`, `review`, and `user`.
+- Never commit secrets (database credentials, JWT signing keys, etc.) to source control.
+- Use environment variables or a local Spring profile (e.g. `application-local.properties`) to supply sensitive values.
