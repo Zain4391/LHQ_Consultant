@@ -12,21 +12,20 @@ Spring Boot REST API backend for the LHQ Consultant platform — a legal service
   <img src="https://skillicons.dev/icons?i=postgres" alt="PostgreSQL" title="PostgreSQL" />
   <img src="https://skillicons.dev/icons?i=redis" alt="Redis" title="Redis" />
   <img src="https://skillicons.dev/icons?i=rabbitmq" alt="RabbitMQ" title="RabbitMQ" />
-  <img src="https://skillicons.dev/icons?i=maven" alt="Maven" title="Maven" />
   <img src="https://skillicons.dev/icons?i=docker" alt="Docker" title="Docker" />
 </p>
 
-| Layer | Technology |
-|---|---|
-| Language | ![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat&logo=openjdk&logoColor=white) |
-| Framework | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-6DB33F?style=flat&logo=spring-boot&logoColor=white) |
-| Security | ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat&logo=spring-security&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-jjwt_0.12.6-000000?style=flat&logo=jsonwebtokens&logoColor=white) |
-| Persistence | ![JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat&logo=spring&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white) |
-| Caching | ![Redis](https://img.shields.io/badge/Redis-FF4438?style=flat&logo=redis&logoColor=white) |
-| Messaging | ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=flat&logo=rabbitmq&logoColor=white) |
-| Validation | ![Spring Validation](https://img.shields.io/badge/Spring_Validation-6DB33F?style=flat&logo=spring&logoColor=white) |
-| Utilities | ![Lombok](https://img.shields.io/badge/Lombok-pink?style=flat) ![DataFaker](https://img.shields.io/badge/DataFaker-2.3.1-blue?style=flat) |
-| Build | ![Maven](https://img.shields.io/badge/Maven-C71A36?style=flat&logo=apache-maven&logoColor=white) |
+| Layer       | Technology                                                                                                                                                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language    | ![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat&logo=openjdk&logoColor=white)                                                                                                                                      |
+| Framework   | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-6DB33F?style=flat&logo=spring-boot&logoColor=white)                                                                                                                 |
+| Security    | ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat&logo=spring-security&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-jjwt_0.12.6-000000?style=flat&logo=jsonwebtokens&logoColor=white) |
+| Persistence | ![JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat&logo=spring&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)                       |
+| Caching     | ![Redis](https://img.shields.io/badge/Redis-FF4438?style=flat&logo=redis&logoColor=white)                                                                                                                                         |
+| Messaging   | ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=flat&logo=rabbitmq&logoColor=white)                                                                                                                                |
+| Validation  | ![Spring Validation](https://img.shields.io/badge/Spring_Validation-6DB33F?style=flat&logo=spring&logoColor=white)                                                                                                                |
+| Utilities   | ![Lombok](https://img.shields.io/badge/Lombok-pink?style=flat) ![DataFaker](https://img.shields.io/badge/DataFaker-2.3.1-blue?style=flat)                                                                                         |
+| Build       | ![Maven](https://img.shields.io/badge/Maven-C71A36?style=flat&logo=apache-maven&logoColor=white)                                                                                                                                  |
 
 ## Prerequisites
 
@@ -83,22 +82,22 @@ Build executable jar:
 
 ## Infrastructure Services (Docker Compose)
 
-| Service | Default Port |
-|---|---|
-| Redis | 6379 |
-| RabbitMQ | 5672 |
-| RabbitMQ Management UI | 15672 |
+| Service                | Default Port |
+| ---------------------- | ------------ |
+| Redis                  | 6379         |
+| RabbitMQ               | 5672         |
+| RabbitMQ Management UI | 15672        |
 
 ## Domain Modules
 
-| Module | Responsibility |
-|---|---|
-| `auth` | Registration, login, and JWT refresh token flow |
-| `user` | User profile management |
-| `lawyer` | Lawyer profile and specialties |
-| `booking` | Availability templates, time slots, and bookings |
-| `cases` | Client-lawyer relationships and legal case tracking |
-| `review` | Booking reviews with sentiment tracking |
+| Module    | Responsibility                                      |
+| --------- | --------------------------------------------------- |
+| `auth`    | Registration, login, and JWT refresh token flow     |
+| `user`    | User profile management                             |
+| `lawyer`  | Lawyer profile and specialties                      |
+| `booking` | Availability templates, time slots, and bookings    |
+| `cases`   | Client-lawyer relationships and legal case tracking |
+| `review`  | Booking reviews with sentiment tracking             |
 
 See [`docs/entity_documentation.md`](docs/entity_documentation.md) for a full description of all JPA entities and their relationships.
 
