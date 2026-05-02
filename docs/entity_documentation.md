@@ -35,6 +35,8 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - bar_number (unique)
   - years_of_experience
   - created_at
+- Indexes:
+  - idx_lawyer_profiles_user_id on user_id
 - Relationships:
   - Many-to-many with Specialty through lawyer_specialties
   - specialties defaults to empty Set using Builder.Default
@@ -60,6 +62,8 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - slot_duration_minutes (required)
   - is_active (required, default true)
   - created_at
+- Indexes:
+  - idx_availability_templates_lawyer on lawyer_id
 
 ## TimeSlot
 
@@ -73,6 +77,10 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - end_time (required)
   - status (enum, required, default AVAILABLE)
   - created_at
+- Indexes:
+  - idx_time_slots_lawyer_id on lawyer_id
+  - idx_time_slots_template_id on template_id
+  - idx_time_slots_status on status
 
 ## Booking
 
@@ -87,6 +95,10 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - charges (precision 10, scale 2)
   - notes
   - created_at
+- Indexes:
+  - idx_bookings_user_id on user_id
+  - idx_bookings_lawyer_id on lawyer_id
+  - idx_bookings_status on status
 
 ## Review
 
@@ -102,6 +114,9 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - comment
   - sentiment (enum)
   - created_at
+- Indexes:
+  - idx_reviews_lawyer_id on lawyer_id
+  - idx_reviews_user_id on user_id
 
 ## ClientLawyer
 
@@ -116,6 +131,9 @@ This document describes all JPA entities currently defined in LHQ_Backend.
 - Constraints:
   - Composite unique constraint on (user_id, lawyer_id)
   - Prevents duplicate client-lawyer pairs
+- Indexes:
+  - idx_client_lawyer_user_id on user_id
+  - idx_client_lawyer_lawyer_id on lawyer_id
 
 ## Case
 
@@ -130,6 +148,9 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - status (enum, required, default OPEN)
   - opened_at
   - closed_at
+- Indexes:
+  - idx_cases_client_lawyer_id on client_lawyer_id
+  - idx_cases_status on status
 
 ## Relationship Summary
 
