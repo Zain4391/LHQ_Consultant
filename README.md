@@ -64,7 +64,7 @@ CREATE DATABASE lhq_db;
 - Password: `Zain_2003`
 - Database: `lhq_db`
 
-> ⚠️ **Security Note:** Change credentials in production. See [application-prod.properties](src/main/resources/application-prod.properties) for production configuration.
+> ⚠️ **Security Note:** Change credentials in production.
 
 ### 3. Start Infrastructure Services
 
