@@ -59,6 +59,10 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
+    @Column
+    @Builder.Default
+    private Boolean isActive = true;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,
             fetch = FetchType.LAZY)
     private LawyerProfile lawyerProfile;
