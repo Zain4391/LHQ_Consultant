@@ -29,30 +29,88 @@ Spring Boot REST API backend for the LHQ Consultant platform — a legal service
 
 ## Prerequisites
 
-- JDK 25
-- Maven (or use the included `mvnw` / `mvnw.cmd` wrapper)
-- PostgreSQL database
-- Redis
-- RabbitMQ (or Docker for the last two)
+- **JDK 25** - [Download](https://www.oracle.com/java/technologies/downloads/)
+- **Maven** (or use the included `mvnw` / `mvnw.cmd` wrapper)
+- **PostgreSQL 12+** - [Download](https://www.postgresql.org/download/)
+- **Docker & Docker Compose** (for Redis and RabbitMQ) - [Download](https://docs.docker.com/get-docker/)
 
-## Quick Start
+## Setup Guide
 
-1. Clone the repository:
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Zain4391/LHQ_Consultant.git
-cd LHQ_Consultant
+cd LHQ_Consultant/LHQ_Backend
 ```
 
-2. Configure database and application settings in `src/main/resources/application.properties`.
+### 2. Create PostgreSQL Database
 
-3. (Optional) Start Redis and RabbitMQ via Docker Compose:
+Start PostgreSQL and create the database:
+
+```bash
+# Connect to PostgreSQL
+psql -U postgres
+
+# In PostgreSQL shell, create the database
+CREATE DATABASE lhq_db;
+\q
+```
+
+**Default credentials (for local development):**
+
+- Host: `localhost`
+- Port: `5432`
+- Username: `postgres`
+- Password: `Zain_2003`
+- Database: `lhq_db`
+
+> ⚠️ **Security Note:** Change credentials in production. See [application-prod.properties](src/main/resources/application-prod.properties) for production configuration.
+
+### 3. Start Infrastructure Services
+
+Start Redis and RabbitMQ using Docker Compose:
 
 ```bash
 docker compose up -d
 ```
 
-4. Run the application:
+Verify services are running:
+
+```bash
+docker ps
+```
+
+Expected output:
+| Service | Port | Status |
+|---------|------|--------|
+| Redis | 6379 | Running |
+| RabbitMQ | 5672 | Running |
+| RabbitMQ UI | 15672 | Running |
+
+**Access RabbitMQ Management UI:**
+
+- URL: `http://localhost:15672`
+- Username: `lhq_user`
+- Password: `lhq_pass`
+
+### 4. Build the Project
+
+```bash
+# Build the project and download dependencies
+./mvnw clean install
+```
+
+Or on Windows:
+
+```powershell
+.\mvnw.cmd clean install
+```
+
+## Running Guide
+
+### Development Environment
+
+**Start the application:**
 
 **Windows:**
 
@@ -66,27 +124,106 @@ docker compose up -d
 ./mvnw spring-boot:run
 ```
 
+The application will:
+
+- Start on `http://localhost:8080`
+- Connect to PostgreSQL at `localhost:5432/lhq_db`
+- Use local profile (`application-local.properties`)
+- Initialize database schema automatically (via Hibernate DDL auto)
+
+**Check application health:**
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+### Production Environment
+
+Build production-ready JAR:
+
+```bash
+./mvnw clean package -DskipTests
+```
+
+Run with production profile:
+
+```bash
+java -jar target/LHQ_Backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+Ensure production database credentials are configured in `application-prod.properties`.
+
 ## Build and Test
 
-Run tests:
+### Run All Tests
 
 ```bash
 ./mvnw test
 ```
 
-Build executable jar:
+### Build Executable JAR
 
 ```bash
 ./mvnw clean package
 ```
 
+Output: `target/LHQ_Backend-0.0.1-SNAPSHOT.jar`
+
+### Run Tests with Coverage Report
+
+```bash
+./mvnw clean test jacoco:report
+```
+
+Report location: `target/site/jacoco/index.html`
+
 ## Infrastructure Services (Docker Compose)
 
-| Service                | Default Port |
-| ---------------------- | ------------ |
-| Redis                  | 6379         |
-| RabbitMQ               | 5672         |
-| RabbitMQ Management UI | 15672        |
+The project uses Docker Compose to manage Redis and RabbitMQ services.
+
+### Services Configuration
+
+| Service                | Port  | Environment                     |
+| ---------------------- | ----- | ------------------------------- |
+| PostgreSQL             | 5432  | Local only (install separately) |
+| Redis                  | 6379  | Container (Docker Compose)      |
+| RabbitMQ AMQP          | 5672  | Container (Docker Compose)      |
+| RabbitMQ Management UI | 15672 | Container (Docker Compose)      |
+
+### Docker Compose Commands
+
+```bash
+# Start services in background
+docker compose up -d
+
+# View running services
+docker compose ps
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+
+# Stop and remove volumes
+docker compose down -v
+```
+
+### Verify Services
+
+```bash
+# Test Redis
+redis-cli ping
+# Expected: PONG
+
+# Test RabbitMQ (port 5672)
+curl localhost:5672
+# Expected: Connection works
+
+# Access RabbitMQ Management UI
+# Browser: http://localhost:15672
+# Credentials: lhq_user / lhq_pass
+```
 
 ## Domain Modules
 
@@ -98,6 +235,174 @@ Build executable jar:
 | `booking` | Availability templates, time slots, and bookings    |
 | `cases`   | Client-lawyer relationships and legal case tracking |
 | `review`  | Booking reviews with sentiment tracking             |
+
+## Troubleshooting
+
+### Issue: "Connection refused" for PostgreSQL
+
+**Solution:**
+
+1. Verify PostgreSQL is installed and running:
+   ```bash
+   psql -U postgres -c "SELECT version();"
+   ```
+2. Check connection details in `application-local.properties`
+3. Ensure database `lhq_db` exists
+
+### Issue: "Unable to connect to Redis"
+
+**Solution:**
+
+```bash
+# Check if Redis container is running
+docker compose ps
+
+# Restart Redis
+docker compose restart redis
+
+# Verify Redis is accessible
+redis-cli ping
+```
+
+### Issue: "RabbitMQ connection failed"
+
+**Solution:**
+
+```bash
+# Check if RabbitMQ container is running
+docker compose ps
+
+# View RabbitMQ logs
+docker compose logs rabbitmq
+
+# Restart RabbitMQ
+docker compose restart rabbitmq
+```
+
+### Issue: "Port already in use"
+
+**Solution:**
+
+```bash
+# Find process using port (example: 8080)
+lsof -i :8080  # macOS/Linux
+netstat -ano | findstr :8080  # Windows
+
+# Stop the process or use different port
+java -jar target/LHQ_Backend-0.0.1-SNAPSHOT.jar --server.port=8081
+```
+
+### Issue: Maven build fails
+
+**Solution:**
+
+```bash
+# Clear Maven cache
+./mvnw clean
+
+# Update dependencies
+./mvnw dependency:resolve
+
+# Rebuild
+./mvnw clean install
+```
+
+## API Documentation
+
+Once the application is running, access API documentation:
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
+- **Actuator:** `http://localhost:8080/actuator`
+
+## Environment Variables
+
+For production deployments, set these environment variables:
+
+```bash
+# Database
+DB_URL=jdbc:postgresql://host:5432/lhq_db
+DB_USERNAME=postgres
+DB_PASSWORD=your_secure_password
+
+# JWT
+JWT_SECRET=your_secret_key_min_32_chars
+JWT_EXPIRATION=86400000
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# RabbitMQ
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=lhq_user
+RABBITMQ_PASSWORD=lhq_pass
+```
+
+## Development Workflow
+
+1. **Create a feature branch:**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make changes and test:**
+
+   ```bash
+   ./mvnw test
+   ```
+
+3. **Build locally:**
+
+   ```bash
+   ./mvnw clean package
+   ```
+
+4. **Run and verify:**
+
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+5. **Commit and push:**
+   ```bash
+   git add .
+   git commit -m "feat: description of changes"
+   git push origin feature/your-feature-name
+   ```
+
+## Project Structure
+
+```
+LHQ_Backend/
+├── src/
+│   ├── main/
+│   │   ├── java/com/LHQ_Backend/LHQ_Backend/
+│   │   │   ├── auth/          # Authentication & JWT
+│   │   │   ├── booking/       # Booking management
+│   │   │   ├── cases/         # Case tracking
+│   │   │   ├── config/        # Spring configuration
+│   │   │   ├── lawyer/        # Lawyer profiles
+│   │   │   ├── notification/  # Notifications
+│   │   │   ├── review/        # Reviews & ratings
+│   │   │   └── user/          # User management
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       ├── application-local.properties
+│   │       └── application-prod.properties
+│   └── test/
+│       └── java/              # Unit & integration tests
+├── docs/
+│   └── entity_documentation.md
+├── pom.xml                    # Maven configuration
+└── docker-compose.yml         # Redis & RabbitMQ services
+```
+
+## License
+
+MIT License - See [LICENSE](LICENSE) file for details
 
 See [`docs/entity_documentation.md`](docs/entity_documentation.md) for a full description of all JPA entities and their relationships.
 
