@@ -83,6 +83,7 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - user_id (many-to-one, required)
   - lawyer_id (many-to-one, required)
   - time_slot_id (one-to-one, required, unique)
+  - status (enum, required, default PENDING)
   - charges (precision 10, scale 2)
   - notes
   - created_at
@@ -96,6 +97,7 @@ This document describes all JPA entities currently defined in LHQ_Backend.
   - user_id (many-to-one, required)
   - lawyer_id (many-to-one, required)
   - booking_id (one-to-one, required, unique)
+  - status (enum, required, default PENDING)
   - rating (required)
   - comment
   - sentiment (enum)
