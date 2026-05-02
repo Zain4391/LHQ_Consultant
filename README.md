@@ -236,6 +236,10 @@ curl localhost:5672
 | `cases`   | Client-lawyer relationships and legal case tracking |
 | `review`  | Booking reviews with sentiment tracking             |
 
+## Database Schema
+
+![Database Schema](../diagrams/Schema.png)
+
 ## Troubleshooting
 
 ### Issue: "Connection refused" for PostgreSQL
