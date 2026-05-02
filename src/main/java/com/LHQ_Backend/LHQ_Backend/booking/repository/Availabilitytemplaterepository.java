@@ -1,25 +1,29 @@
-
 package com.LHQ_Backend.LHQ_Backend.booking.repository;
 
+import com.LHQ_Backend.LHQ_Backend.booking.entity.AvailabilityTemplate;
+import com.LHQ_Backend.LHQ_Backend.booking.enums.DayOfWeek;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.LHQ_Backend.LHQ_Backend.booking.entity.AvailabilityTemplate;
+
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
 
 @Repository
-public interface Availabilitytemplaterepository
+public interface AvailabilityTemplateRepository
         extends JpaRepository<AvailabilityTemplate, String> {
-    Page<AvailabilityTemplate> findAllByLawyerId(String lawyerId, Pageable page);
+
+    Page<AvailabilityTemplate> findAllByLawyerId(String lawyerId, Pageable pageable);
 
     List<AvailabilityTemplate> findAllByLawyerIdAndIsActiveTrue(String lawyerId);
 
     Optional<AvailabilityTemplate> findByIdAndLawyerId(String id, String lawyerId);
+
+    boolean existsByLawyerIdAndDayOfWeek(String lawyerId, DayOfWeek dayOfWeek);
 
     /**
      * Fetches all active templates for ALL lawyers in one query. Used by the weekly @Scheduled
@@ -34,7 +38,7 @@ public interface Availabilitytemplaterepository
 
     /**
      * Deactivates all templates for a lawyer in bulk. Called when a lawyer account is suspended by
-     * ADMIN. Will be a part of weekly job which checks account suspension
+     * ADMIN.
      */
     @Modifying
     @Query("""
