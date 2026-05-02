@@ -238,7 +238,7 @@ curl localhost:5672
 
 ## Database Schema
 
-![Database Schema](../diagrams/Schema.png)
+![Database Schema](./diagrams/Schema.png)
 
 ## Troubleshooting
 
