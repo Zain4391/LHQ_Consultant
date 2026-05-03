@@ -55,6 +55,9 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(name = "profile_image_url", nullable = true)
+    private String profileImageUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
