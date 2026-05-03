@@ -60,4 +60,61 @@ public interface LawyerProfileRepository extends JpaRepository<LawyerProfile, St
                                         WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
                                         """)
         Page<LawyerProfile> searchByLawyerFullName(@Param("name") String name, Pageable pageable);
+
+        /**
+         * Replaces the existing findByIdWithSpecialties. Fetches both user and specialties —
+         * required for LawyerMapper.toResponse()
+         */
+        @Query("""
+                        SELECT lp FROM LawyerProfile lp
+                        JOIN FETCH lp.user
+                        LEFT JOIN FETCH lp.specialties
+                        WHERE lp.id = :id
+                        """)
+        Optional<LawyerProfile> findByIdWithFullGraph(@Param("id") String id);
+
+        /**
+         * Paginated list with user + specialties fetched. Used by: GET /lawyers (browse all)
+         */
+        @Query(value = """
+                        SELECT DISTINCT lp FROM LawyerProfile lp
+                        JOIN FETCH lp.user
+                        LEFT JOIN FETCH lp.specialties
+                        """, countQuery = """
+                        SELECT COUNT(lp) FROM LawyerProfile lp
+                        """)
+        Page<LawyerProfile> findAllWithFullGraph(Pageable pageable);
+
+        /**
+         * Filter by specialty with full graph.
+         */
+        @Query(value = """
+                        SELECT DISTINCT lp FROM LawyerProfile lp
+                        JOIN FETCH lp.user
+                        LEFT JOIN FETCH lp.specialties s
+                        WHERE LOWER(s.name) = LOWER(:specialtyName)
+                        """, countQuery = """
+                        SELECT COUNT(DISTINCT lp) FROM LawyerProfile lp
+                        JOIN lp.specialties s
+                        WHERE LOWER(s.name) = LOWER(:specialtyName)
+                        """)
+        Page<LawyerProfile> findAllBySpecialtyNameWithFullGraph(
+                        @Param("specialtyName") String specialtyName, Pageable pageable);
+
+        /**
+         * Full-name search with full graph.
+         */
+        @Query(value = """
+                        SELECT lp FROM LawyerProfile lp
+                        JOIN FETCH lp.user u
+                        LEFT JOIN FETCH lp.specialties
+                        WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
+                        """,
+                        countQuery = """
+                                        SELECT COUNT(lp) FROM LawyerProfile lp
+                                        JOIN lp.user u
+                                        WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
+                                        """)
+        Page<LawyerProfile> searchByLawyerFullNameWithFullGraph(@Param("name") String name,
+                        Pageable pageable);
 }
