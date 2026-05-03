@@ -236,6 +236,23 @@ curl localhost:5672
 | `cases`   | Client-lawyer relationships and legal case tracking |
 | `review`  | Booking reviews with sentiment tracking             |
 
+### Repository Layer Enhancements
+
+Each domain module includes an optimized repository layer with:
+
+- **N+1 Query Prevention**: Full graph fetch methods using JPA FETCH JOINs to load all related entities in a single query
+- **Efficient Pagination**: Support for large result sets with proper countQuery specifications
+- **Ownership Verification**: Security checks to ensure users can only access their own data
+- **Bulk Operations**: @Modifying queries for efficient mass updates and deletes
+
+Example repository methods:
+
+- `findByIdWithFullGraph()` — Eager load complete entity graphs for DTO mapping
+- `findAllByUserIdWithFullGraph(Pageable)` — Paginated results with all related data
+- `findByIdAndPrincipal()` — Ownership verification queries
+
+See [`docs/repository_documentation.md`](docs/repository_documentation.md) for complete query patterns and optimization details.
+
 ## Database Schema
 
 ![Database Schema](./diagrams/Schema.png)
@@ -318,6 +335,14 @@ Once the application is running, access API documentation:
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 - **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 - **Actuator:** `http://localhost:8080/actuator`
+
+## Project Documentation
+
+Comprehensive documentation for the backend architecture and data layer:
+
+- **Entity Documentation:** [`docs/entity_documentation.md`](docs/entity_documentation.md) — JPA entities, relationships, indexes, and constraints
+- **Repository Documentation:** [`docs/repository_documentation.md`](docs/repository_documentation.md) — Data access layer with optimized queries, N+1 prevention strategies, and full graph fetch methods
+- **Database Schema:** ![Database Schema](./diagrams/Schema.png)
 
 ## Environment Variables
 
