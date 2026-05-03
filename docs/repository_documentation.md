@@ -5,6 +5,7 @@ Repositories provide data access abstraction and support JPA-derived query metho
 ### Patterns & Best Practices
 
 - **FETCH JOIN**: Used to eagerly load relationships in a single query, avoiding N+1 problems.
+- **Full Graph Methods**: New `*WithFullGraph()` methods provide complete entity graphs for DTO mapping.
 - **Custom Queries**: Explicit JPQL for complex filtering, ownership checks, and aggregations.
 - **Modifying Queries**: @Modifying @Query for bulk updates/deletes with transaction management.
 - **Pagination**: Page<T> return types with Pageable for large result sets.
@@ -34,20 +35,24 @@ Repositories provide data access abstraction and support JPA-derived query metho
 
 **Key Methods:**
 
-| Method                                                   | Purpose                                                        |
-| -------------------------------------------------------- | -------------------------------------------------------------- |
-| `findByUserId(String userId)`                            | Get lawyer profile for a user (one-to-one)                     |
-| `existsByUserId(String userId)`                          | Check if user is a registered lawyer                           |
-| `existsByBarNumber(String barNumber)`                    | Verify bar number uniqueness                                   |
-| `findByIdWithSpecialties(String id)`                     | Fetch lawyer WITH specialties in single query (N+1 prevention) |
-| `findAllBySpecialtyName(String specialtyName, Pageable)` | Filter lawyers by specialty (case-insensitive)                 |
-| `searchByFullName(String name, Pageable)`                | Search lawyers by first/last name (on joined User)             |
+| Method                                                                | Purpose                                                        |
+| --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `findByUserId(String userId)`                                         | Get lawyer profile for a user (one-to-one)                     |
+| `existsByUserId(String userId)`                                       | Check if user is a registered lawyer                           |
+| `existsByBarNumber(String barNumber)`                                 | Verify bar number uniqueness                                   |
+| `findByIdWithSpecialties(String id)`                                  | Fetch lawyer WITH specialties in single query (N+1 prevention) |
+| `findAllBySpecialtyName(String specialtyName, Pageable)`              | Filter lawyers by specialty (case-insensitive)                 |
+| `searchByLawyerFullName(String name, Pageable)`                       | Search lawyers by first/last name (on joined User)             |
+| `findByIdWithFullGraph(String id)`                                    | Full graph fetch: lawyer → user, specialties                   |
+| `findAllWithFullGraph(Pageable)`                                      | Paginated list with user + specialties (for browse all)        |
+| `findAllBySpecialtyNameWithFullGraph(String specialtyName, Pageable)` | Filter by specialty with full graph                            |
 
 **Usage:**
 
-- Profile Pages: Load lawyer details with specialties
+- Profile Pages: Load lawyer details with specialties using full graph methods
 - Search: Filter by specialty name or lawyer name
 - Validation: Bar number uniqueness during profile creation
+- Browse: Display all lawyers with complete data (prevents N+1)
 
 ### SpecialtyRepository
 
@@ -72,23 +77,30 @@ Repositories provide data access abstraction and support JPA-derived query metho
 
 **Key Methods:**
 
-| Method                                                                        | Purpose                                       |
-| ----------------------------------------------------------------------------- | --------------------------------------------- |
-| `findAllByUserId(String userId, Pageable)`                                    | User's bookings (paginated)                   |
-| `findAllByUserIdAndStatus(String userId, BookingStatus status, Pageable)`     | User's bookings filtered by status            |
-| `findAllByLawyerId(String lawyerId, Pageable)`                                | Lawyer's bookings (paginated)                 |
-| `findAllByLawyerIdAndStatus(String lawyerId, BookingStatus status, Pageable)` | Lawyer's bookings filtered by status          |
-| `findByIdAndUserId(String id, String userId)`                                 | Ownership check: booking belongs to user      |
-| `findByIdAndLawyerId(String id, String lawyerId)`                             | Ownership check: booking belongs to lawyer    |
-| `findCompletedBookingByIdAndUserId(String bookingId, String userId)`          | Fetch COMPLETED booking (for review creation) |
-| `existsByTimeSlotId(String timeSlotId)`                                       | Prevent double-booking of a time slot         |
+| Method                                                                        | Purpose                                                         |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `findAllByUserId(String userId, Pageable)`                                    | User's bookings (paginated)                                     |
+| `findAllByUserIdAndStatus(String userId, BookingStatus status, Pageable)`     | User's bookings filtered by status                              |
+| `findAllByLawyerId(String lawyerId, Pageable)`                                | Lawyer's bookings (paginated)                                   |
+| `findAllByLawyerIdAndStatus(String lawyerId, BookingStatus status, Pageable)` | Lawyer's bookings filtered by status                            |
+| `findByIdAndUserId(String id, String userId)`                                 | Ownership check: booking belongs to user                        |
+| `findByIdAndLawyerId(String id, String lawyerId)`                             | Ownership check: booking belongs to lawyer                      |
+| `findCompletedBookingByIdAndUserId(String bookingId, String userId)`          | Fetch COMPLETED booking (for review creation)                   |
+| `existsActiveBookingForTimeSlot(String timeSlotId)`                           | Prevent double-booking of a time slot                           |
+| `existsConfirmedBookingBetween(String userId, String lawyerId)`               | Check if confirmed booking exists between user and lawyer       |
+| `findByIdWithFullGraph(String id)`                                            | Full graph fetch: booking → user, lawyer, lawyer.user, timeSlot |
+| `findByIdAndUserIdWithFullGraph(String id, String userId)`                    | Full graph with ownership check (user-side)                     |
+| `findByIdAndLawyerIdWithFullGraph(String id, String lawyerId)`                | Full graph with ownership check (lawyer-side)                   |
+| `findAllByUserIdWithFullGraph(String userId, Pageable)`                       | Paginated list with full graph (user-side)                      |
+| `findAllByLawyerIdWithFullGraph(String lawyerId, Pageable)`                   | Paginated list with full graph (lawyer-side)                    |
 
 **Usage:**
 
-- User Dashboard: Show user's bookings
-- Lawyer Dashboard: Show lawyer's bookings
+- User Dashboard: Show user's bookings with full entity graph
+- Lawyer Dashboard: Show lawyer's bookings with full entity graph
 - Booking Confirmation: Check time slot availability
 - Review Creation: Validate booking was completed before allowing review
+- Full Graph Fetches: Used by services mapping to BookingResponse DTOs (prevents N+1 problems)
 
 ### AvailabilityTemplateRepository
 
@@ -141,22 +153,27 @@ Repositories provide data access abstraction and support JPA-derived query metho
 
 **Key Methods:**
 
-| Method                                                                          | Purpose                                                   |
-| ------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `findAllByLawyerId(String lawyerId, Pageable)`                                  | List all reviews for a lawyer                             |
-| `findAllByUserId(String userId, Pageable)`                                      | List all reviews by a user                                |
-| `findAllByLawyerIdAndSentiment(String lawyerId, Sentiment sentiment, Pageable)` | Filter reviews by sentiment (POSITIVE, NEGATIVE, NEUTRAL) |
-| `findByBookingId(String bookingId)`                                             | 1:1 lookup: get review for a booking                      |
-| `existsByBookingId(String bookingId)`                                           | Check if booking already has a review                     |
-| `findRatingStatsByLawyerId(String lawyerId)`                                    | Aggregate: average rating + count for lawyer profile      |
-| `findSentimentBreakdownByLawyerId(String lawyerId)`                             | Analytics: sentiment distribution [Sentiment, count]      |
+| Method                                                                          | Purpose                                                       |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `findAllByLawyerId(String lawyerId, Pageable)`                                  | List all reviews for a lawyer                                 |
+| `findAllByUserId(String userId, Pageable)`                                      | List all reviews by a user                                    |
+| `findAllByLawyerIdAndSentiment(String lawyerId, Sentiment sentiment, Pageable)` | Filter reviews by sentiment (POSITIVE, NEGATIVE, NEUTRAL)     |
+| `findByBookingId(String bookingId)`                                             | 1:1 lookup: get review for a booking                          |
+| `existsByBookingId(String bookingId)`                                           | Check if booking already has a review                         |
+| `findRatingStatsByLawyerId(String lawyerId)`                                    | Aggregate: average rating + count for lawyer profile          |
+| `findSentimentBreakdownByLawyerId(String lawyerId)`                             | Analytics: sentiment distribution [Sentiment, count]          |
+| `findByIdWithFullGraph(String id)`                                              | Full graph fetch: review → user, lawyer, lawyer.user, booking |
+| `findAllByLawyerIdWithFullGraph(String lawyerId, Pageable)`                     | Paginated list for a lawyer with full graph                   |
+| `findAllByUserIdWithFullGraph(String userId, Pageable)`                         | Paginated list for a user with full graph                     |
+| `findByBookingIdWithFullGraph(String bookingId)`                                | Full graph fetch by bookingId (for review creation)           |
 
 **Usage:**
 
 - Lawyer Profile: Display average rating and review count
-- Review Display: Show reviews for a lawyer (with pagination)
+- Review Display: Show reviews for a lawyer (with full entity graph)
 - Analytics Dashboard: Sentiment breakdown for admin
-- Review Creation: Check booking doesn't already have a review
+- Review Creation: Check booking doesn't already have a review (prevents duplicates)
+- Full Graph Fetches: Used by services mapping to ReviewResponse DTOs
 
 ### ClientLawyerRepository
 
@@ -173,11 +190,14 @@ Repositories provide data access abstraction and support JPA-derived query metho
 | `findByUserIdAndLawyerId(String userId, String lawyerId)`                          | Lookup existing relationship                                          |
 | `existsByUserIdAndLawyerId(String userId, String lawyerId)`                        | Check relationship exists (prevent duplicate on booking confirmation) |
 | `findByIdAndPrincipal(String id, String principalId)`                              | Ownership check: current user is client OR lawyer in relationship     |
+| `findByIdWithFullGraph(String id)`                                                 | Full graph fetch: clientLawyer → user, lawyer, lawyer.user            |
+| `findAllByUserIdWithFullGraph(String userId, Pageable)`                            | Paginated list for a user with full graph                             |
+| `findAllByLawyerIdWithFullGraph(String lawyerId, Pageable)`                        | Paginated list for a lawyer with full graph                           |
 
 **Usage:**
 
 - Case Creation: Verify ClientLawyer relationship exists
-- Dashboard: Show connected lawyers/clients
+- Dashboard: Show connected lawyers/clients with full entity graph
 - Booking Confirmation: Auto-create ClientLawyer relationship if not exists
 - Case Operations: Only client or lawyer can modify relationship
 
@@ -187,33 +207,39 @@ Repositories provide data access abstraction and support JPA-derived query metho
 
 **Key Methods:**
 
-| Method                                                                                 | Purpose                                         |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `findAllByClientLawyerId(String clientLawyerId, Pageable)`                             | List cases for a ClientLawyer relationship      |
-| `findAllByClientLawyerIdAndStatus(String clientLawyerId, CaseStatus status, Pageable)` | Filter cases by status (OPEN, CLOSED, INACTIVE) |
-| `findAllByUserId(String userId, Pageable)`                                             | All cases for a client (via ClientLawyer join)  |
-| `findAllByLawyerId(String lawyerId, Pageable)`                                         | All cases for a lawyer (via ClientLawyer join)  |
-| `findAllByUserIdAndStatus(String userId, CaseStatus status, Pageable)`                 | Client's cases filtered by status               |
-| `findAllByLawyerIdAndStatus(String lawyerId, CaseStatus status, Pageable)`             | Lawyer's cases filtered by status               |
+| Method                                                                                 | Purpose                                                           |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `findAllByClientLawyerId(String clientLawyerId, Pageable)`                             | List cases for a ClientLawyer relationship                        |
+| `findAllByClientLawyerIdAndStatus(String clientLawyerId, CaseStatus status, Pageable)` | Filter cases by status (OPEN, CLOSED, INACTIVE)                   |
+| `findAllByUserId(String userId, Pageable)`                                             | All cases for a client (via ClientLawyer join)                    |
+| `findAllByLawyerId(String lawyerId, Pageable)`                                         | All cases for a lawyer (via ClientLawyer join)                    |
+| `findAllByUserIdAndStatus(String userId, CaseStatus status, Pageable)`                 | Client's cases filtered by status                                 |
+| `findAllByLawyerIdAndStatus(String lawyerId, CaseStatus status, Pageable)`             | Lawyer's cases filtered by status                                 |
+| `findByIdAndPrincipal(String caseId, String principalId)`                              | Ownership check: user is client or lawyer in case                 |
+| `findByIdWithFullGraph(String id)`                                                     | Full graph fetch: case → clientLawyer → user, lawyer, lawyer.user |
+| `findAllByClientLawyerIdWithFullGraph(String clientLawyerId, Pageable)`                | Paginated list by clientLawyerId with full graph                  |
 
 **Usage:**
 
-- Client Dashboard: Show my cases
-- Lawyer Dashboard: Show my client cases
+- Client Dashboard: Show my cases with full entity graph
+- Lawyer Dashboard: Show my client cases with full entity graph
 - Case Management: List cases by status
+- Full Graph Fetches: Used by services mapping to CaseResponse DTOs
 
 ## Query Performance Considerations
 
 ### N+1 Prevention
 
-- **LawyerProfileRepository.findByIdWithSpecialties()**: Uses FETCH JOIN to load specialties in single query
-- **AvailabilityTemplateRepository.findAllActiveWithLawyer()**: FETCH JOINs lawyer for scheduler
-- **TimeSlotRepository.findAvailableSlots()**: Directly queries TimeSlot without loading related bookings unless needed
+- **LawyerProfileRepository.findByIdWithFullGraph()**: Uses FETCH JOIN to load user + specialties in single query
+- **BookingRepository.findByIdWithFullGraph()**: Eagerly loads user, lawyer with lawyer's user, and timeSlot
+- **ReviewRepository.findByIdWithFullGraph()**: Eagerly loads user, lawyer, lawyer's user, and booking
+- **ClientLawyerRepository.findByIdWithFullGraph()**: Eagerly loads user and lawyer with lawyer's user
+- **CaseRepository.findByIdWithFullGraph()**: Eagerly loads complete ClientLawyer graph with user and lawyer details
 
 ### Pagination
 
 - Use `Pageable` for queries returning large result sets
-- Countquery is explicitly specified for FETCH JOIN + Pageable combinations
+- `countQuery` is explicitly specified for FETCH JOIN + Pageable combinations
 - Page result includes totalElements, totalPages, hasNext for UI pagination controls
 
 ### Bulk Operations
