@@ -60,8 +60,8 @@ CREATE DATABASE lhq_db;
 
 - Host: `localhost`
 - Port: `5432`
-- Username: `postgres`
-- Password: `Zain_2003`
+- Username: `<YOUR_USERNAME>`
+- Password: `<YOUR_PASSWORD>`
 - Database: `lhq_db`
 
 > ⚠️ **Security Note:** Change credentials in production.
