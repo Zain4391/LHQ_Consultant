@@ -7,14 +7,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.ForgotPasswordRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.LoginRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RefreshTokenRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RegisterRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Response.AuthResponse;
 import com.LHQ_Backend.LHQ_Backend.auth.exception.InvalidCredentialsException;
+import com.LHQ_Backend.LHQ_Backend.auth.exception.PasswordMismatchException;
 import com.LHQ_Backend.LHQ_Backend.auth.exception.TokenRefreshException;
 import com.LHQ_Backend.LHQ_Backend.auth.service.interfaces.AuthService;
 import com.LHQ_Backend.LHQ_Backend.config.exception.ConflictException;
+import com.LHQ_Backend.LHQ_Backend.config.exception.ResourceNotFoundException;
 import com.LHQ_Backend.LHQ_Backend.config.security.JwtService;
 import com.LHQ_Backend.LHQ_Backend.config.security.RefreshTokenService;
 import com.LHQ_Backend.LHQ_Backend.user.entity.User;
@@ -117,5 +120,20 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String refreshToken) {
         refreshTokenService.delete(refreshToken);
         log.debug("Refresh token invalidated on logout");
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new PasswordMismatchException();
+        }
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        log.info("Password reset via forgot-password for userId={}", user.getId());
     }
 }
