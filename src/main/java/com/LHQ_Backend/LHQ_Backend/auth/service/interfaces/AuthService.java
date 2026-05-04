@@ -1,5 +1,6 @@
 package com.LHQ_Backend.LHQ_Backend.auth.service.interfaces;
 
+import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.ForgotPasswordRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.LoginRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RefreshTokenRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RegisterRequest;
@@ -12,6 +13,8 @@ public interface AuthService {
     AuthResponse login(LoginRequest request);
 
     AuthResponse refresh(RefreshTokenRequest request);
+
+    void forgotPassword(ForgotPasswordRequest request);
 
     void logout(String refreshToken);
 }

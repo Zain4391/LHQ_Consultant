@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.ForgotPasswordRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.LoginRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RefreshTokenRequest;
 import com.LHQ_Backend.LHQ_Backend.auth.DTOs.Request.RegisterRequest;
@@ -49,4 +50,11 @@ public class AuthController {
         authService.logout(request.refreshToken());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
 }
