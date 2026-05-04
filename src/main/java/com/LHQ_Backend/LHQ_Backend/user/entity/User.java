@@ -1,10 +1,13 @@
 package com.LHQ_Backend.LHQ_Backend.user.entity;
 
 import java.time.Instant;
-
+import java.util.Collection;
+import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
-
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import com.LHQ_Backend.LHQ_Backend.lawyer.entity.LawyerProfile;
 import com.LHQ_Backend.LHQ_Backend.user.enums.Role;
 
@@ -30,7 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
     @Id
     @UuidGenerator
     @Column(updatable = false, nullable = false)
@@ -69,4 +72,42 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,
             fetch = FetchType.LAZY)
     private LawyerProfile lawyerProfile;
+
+    // User Detials for Spring Security
+
+    /**
+     * Spring Security uses "ROLE_" prefix convention. e.g. Role.LAWYER → "ROLE_LAWYER" This
+     * function converts from ROLE.LAWYER to ROLE_LAWYER
+     */
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    /** Spring Security's username = our email */
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return Boolean.TRUE.equals(isActive);
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(isActive);
+    }
 }
